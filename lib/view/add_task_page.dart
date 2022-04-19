@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,21 +13,19 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 // 新しいタスクを追加するためのファイル
 
 class AddTaskPage extends ConsumerWidget {
-  // 入力中のtodoのインスタンスを作成
   TempTodoItemData temp = TempTodoItemData();
+  final DateTime initialDate;
+  AddTaskPage(this.initialDate);
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Providerの監視
-    final _selectedDayProvider = ref.watch(selectedDayProvider);
-    final _selectedDayNotifier = ref.watch(selectedDayProvider.notifier);
+    final _todoNotifier = ref.watch(todoDatabaseProvider.notifier);
     final _toggleProvider = ref.watch(toggleProvider);
     final _toggleNotifier = ref.watch(toggleProvider.notifier);
     final _startTimeProvider = ref.watch(startTimeProvider);
     final _startTimeNotifier = ref.watch(startTimeProvider.notifier);
     final _endTimeProvider = ref.watch(endTimeProvider);
     final _endTimeNotifier = ref.watch(endTimeProvider.notifier);
-    final _todoProvider = ref.watch(todoDatabaseProvider);
-    final _todoNotifier = ref.watch(todoDatabaseProvider.notifier);
 
     return Scaffold(
       backgroundColor: Colors.grey[300],
@@ -43,12 +42,57 @@ class AddTaskPage extends ConsumerWidget {
         actions: [
           SaveButtonWidget(
             press: () async {
-              await _todoNotifier.writeData(temp);
-              _toggleNotifier.state = false;
-              _startTimeNotifier.state = null;
-              _endTimeNotifier.state = null;
-              print(temp);
-              Navigator.pop(context);
+              if (temp.title == '' || temp.description == '') {
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          AlertDialog(
+                            title: const Text(
+                              '全ての項目を入力してください。',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    });
+              } else if (temp.startTime == null || temp.endTime == null) {
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          AlertDialog(
+                            title: const Text(
+                              '時刻を設定してください。',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    });
+              } else {
+                await _todoNotifier.writeData(temp);
+                _toggleNotifier.state = false;
+                Navigator.pop(context);
+              }
             },
           ),
         ],
@@ -76,7 +120,7 @@ class AddTaskPage extends ConsumerWidget {
                         value: _toggleProvider,
                         onChanged: (value) {
                           _toggleNotifier.state = value;
-                          temp = temp.copyWith(allDay: true);
+                          temp = temp.copyWith(allDay: value);
                         },
                         activeTrackColor: Colors.lightGreenAccent,
                         activeColor: Colors.green,
@@ -90,19 +134,19 @@ class AddTaskPage extends ConsumerWidget {
                           DatePicker.showDateTimePicker(
                             context,
                             showTitleActions: true,
-                            minTime: DateTime.now(),
+                            minTime: initialDate,
                             onConfirm: (date) {
                               _startTimeNotifier.state = date;
                               temp = temp.copyWith(startTime: date);
                             },
-                            currentTime: _selectedDayNotifier.state,
+                            currentTime: initialDate,
                             locale: LocaleType.jp,
                           );
                         },
                         child: Text(
                           _startTimeProvider == null
                               ? DateFormat('yyyy-MM-dd HH:mm')
-                                  .format(_selectedDayProvider)
+                                  .format(initialDate)
                               : DateFormat('yyyy-MM-dd HH:mm')
                                   .format(temp.startTime!),
                         ),
@@ -116,19 +160,19 @@ class AddTaskPage extends ConsumerWidget {
                           DatePicker.showDateTimePicker(
                             context,
                             showTitleActions: true,
-                            minTime: DateTime.now(),
+                            minTime: initialDate,
                             onConfirm: (date) {
                               _endTimeNotifier.state = date;
                               temp = temp.copyWith(endTime: date);
                             },
-                            currentTime: _selectedDayNotifier.state,
+                            currentTime: initialDate,
                             locale: LocaleType.jp,
                           );
                         },
                         child: Text(
                           _endTimeProvider == null
                               ? DateFormat('yyyy-MM-dd HH:mm')
-                                  .format(_selectedDayNotifier.state)
+                                  .format(initialDate)
                               : DateFormat('yyyy-MM-dd HH:mm')
                                   .format(temp.endTime!),
                         ),

@@ -1,16 +1,8 @@
-// Providerの作成
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:calender_app/model/todo.dart';
 import 'package:calender_app/service/db.dart';
 import 'package:calender_app/util/util.dart';
-
-final selectedDayProvider = StateProvider((ref) => dayTime);
-final focusedDayProvider = StateProvider((ref) => dayTime);
-final visibleProvider = StateProvider<bool>((ref) => false);
-final startTimeProvider = StateProvider<DateTime?>((ref) => null);
-final endTimeProvider = StateProvider<DateTime?>((ref) => null);
-final toggleProvider = StateProvider<bool>((ref) => false);
 
 // DBの操作を行うクラス（dbの操作にstateを絡める）
 class TodoDatabaseNotifier extends StateNotifier<TodoStateData> {
@@ -70,3 +62,15 @@ final todoDatabaseProvider = StateNotifierProvider((_) {
   notify.readData();
   return notify;
 });
+
+final visibleProvider = StateProvider<bool>((ref) => false);
+final selectedDayProvider = StateProvider((ref) => DateTime.now());
+final focusedDayProvider = StateProvider((ref) => DateTime.now());
+
+final startTimeProvider = StateProvider<DateTime?>((ref) => null);
+final endTimeProvider = StateProvider<DateTime?>((ref) => null);
+final toggleProvider = StateProvider((ref) => false);
+
+final editStartTimeProvider = StateProvider<DateTime?>((ref) => null);
+final editEndTimeProvider = StateProvider<DateTime?>((ref) => null);
+final editToggleProvider = StateProvider((ref) => false);

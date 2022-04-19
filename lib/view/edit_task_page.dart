@@ -24,24 +24,11 @@ class EditTaskPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Providerの監視
-    final _selectedDayProvider = ref.watch(selectedDayProvider);
-    final _selectedDayNotifier = ref.watch(selectedDayProvider.notifier);
-    final _toggleProvider = ref.watch(toggleProvider);
-    final _toggleNotifier = ref.watch(toggleProvider.notifier);
-    final _startTimeProvider = ref.watch(startTimeProvider);
-    final _startTimeNotifier = ref.watch(startTimeProvider.notifier);
-    final _endTimeProvider = ref.watch(endTimeProvider);
-    final _endTimeNotifier = ref.watch(endTimeProvider.notifier);
-    final _todoProvider = ref.watch(todoDatabaseProvider);
     final _todoNotifier = ref.watch(todoDatabaseProvider.notifier);
-
-    // コントローラー
     final _titleController = TextEditingController(text: item.title);
     final _descriptionController =
         TextEditingController(text: item.description);
 
-    // 保存するタスク
     var edited = item;
 
     return Scaffold(
@@ -52,7 +39,6 @@ class EditTaskPage extends ConsumerWidget {
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () {
-            _toggleNotifier.state = false;
             Navigator.pop(context);
           },
         ),
@@ -87,7 +73,7 @@ class EditTaskPage extends ConsumerWidget {
                     DateSettingWidget(
                       label: '終日',
                       child: Switch(
-                        value: item.allDay,
+                        value: edited.allDay,
                         onChanged: (value) {
                           edited = edited.copyWith(allDay: value);
                         },
@@ -103,22 +89,16 @@ class EditTaskPage extends ConsumerWidget {
                           DatePicker.showDateTimePicker(
                             context,
                             showTitleActions: true,
-                            minTime: DateTime.now(),
+                            minTime: edited.startTime,
                             onConfirm: (date) {
-                              _startTimeNotifier.state = date;
                               edited = edited.copyWith(startTime: date);
                             },
-                            currentTime: _selectedDayNotifier.state,
+                            currentTime: edited.startTime,
                             locale: LocaleType.jp,
                           );
                         },
-                        child: Text(
-                          _startTimeProvider == null
-                              ? DateFormat('yyyy-MM-dd HH:mm')
-                                  .format(item.startTime!)
-                              : DateFormat('yyyy-MM-dd HH:mm')
-                                  .format(edited.startTime!),
-                        ),
+                        child: Text(DateFormat('yyyy-MM-dd HH:mm')
+                            .format(edited.startTime!)),
                       ),
                     ),
                     const SizedBox(height: 1),
@@ -129,21 +109,17 @@ class EditTaskPage extends ConsumerWidget {
                           DatePicker.showDateTimePicker(
                             context,
                             showTitleActions: true,
-                            minTime: DateTime.now(),
+                            minTime: edited.endTime,
                             onConfirm: (date) {
-                              _endTimeNotifier.state = date;
                               edited = edited.copyWith(endTime: date);
                             },
-                            currentTime: _selectedDayNotifier.state,
+                            currentTime: edited.endTime,
                             locale: LocaleType.jp,
                           );
                         },
                         child: Text(
-                          _endTimeProvider == null
-                              ? DateFormat('yyyy-MM-dd HH:mm')
-                                  .format(item.endTime!)
-                              : DateFormat('yyyy-MM-dd HH:mm')
-                                  .format(edited.endTime!),
+                          DateFormat('yyyy-MM-dd HH:mm')
+                              .format(edited.endTime!),
                         ),
                       ),
                     ),
@@ -164,7 +140,37 @@ class EditTaskPage extends ConsumerWidget {
                     const SizedBox(height: 25),
                     GestureDetector(
                       onTap: () async {
-                        await db.deleteData(item);
+                        await showDialog(
+                          context: context,
+                          builder: (context) {
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                AlertDialog(
+                                  title: const Text(
+                                    '予定の削除',
+                                  ),
+                                  content: const Text('本当にこの予定を削除しますか？'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () async {
+                                        await db.deleteData(item);
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text('削除'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text('キャンセル'),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                          },
+                        );
                         Navigator.pop(context);
                       },
                       child: Container(
