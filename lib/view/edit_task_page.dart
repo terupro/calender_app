@@ -156,6 +156,7 @@ class EditTaskPage extends ConsumerWidget {
                                       onPressed: () async {
                                         await db.deleteData(item);
                                         Navigator.pop(context);
+                                        Navigator.pop(context);
                                       },
                                       child: const Text('削除'),
                                     ),
@@ -171,7 +172,6 @@ class EditTaskPage extends ConsumerWidget {
                             );
                           },
                         );
-                        Navigator.pop(context);
                       },
                       child: Container(
                         width: double.infinity,
