@@ -201,8 +201,8 @@ class _$TempTodoItemDataTearOff {
       {String title = '',
       String description = '',
       bool allDay = false,
-      DateTime? startTime = null,
-      DateTime? endTime = null}) {
+      required DateTime startTime,
+      required DateTime endTime}) {
     return _TempTodoItemData(
       title: title,
       description: description,
@@ -221,8 +221,8 @@ mixin _$TempTodoItemData {
   String get title => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
   bool get allDay => throw _privateConstructorUsedError;
-  DateTime? get startTime => throw _privateConstructorUsedError;
-  DateTime? get endTime => throw _privateConstructorUsedError;
+  DateTime get startTime => throw _privateConstructorUsedError;
+  DateTime get endTime => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $TempTodoItemDataCopyWith<TempTodoItemData> get copyWith =>
@@ -238,8 +238,8 @@ abstract class $TempTodoItemDataCopyWith<$Res> {
       {String title,
       String description,
       bool allDay,
-      DateTime? startTime,
-      DateTime? endTime});
+      DateTime startTime,
+      DateTime endTime});
 }
 
 /// @nodoc
@@ -275,11 +275,11 @@ class _$TempTodoItemDataCopyWithImpl<$Res>
       startTime: startTime == freezed
           ? _value.startTime
           : startTime // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
+              as DateTime,
       endTime: endTime == freezed
           ? _value.endTime
           : endTime // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
+              as DateTime,
     ));
   }
 }
@@ -295,8 +295,8 @@ abstract class _$TempTodoItemDataCopyWith<$Res>
       {String title,
       String description,
       bool allDay,
-      DateTime? startTime,
-      DateTime? endTime});
+      DateTime startTime,
+      DateTime endTime});
 }
 
 /// @nodoc
@@ -334,11 +334,11 @@ class __$TempTodoItemDataCopyWithImpl<$Res>
       startTime: startTime == freezed
           ? _value.startTime
           : startTime // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
+              as DateTime,
       endTime: endTime == freezed
           ? _value.endTime
           : endTime // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
+              as DateTime,
     ));
   }
 }
@@ -350,8 +350,8 @@ class _$_TempTodoItemData implements _TempTodoItemData {
       {this.title = '',
       this.description = '',
       this.allDay = false,
-      this.startTime = null,
-      this.endTime = null});
+      required this.startTime,
+      required this.endTime});
 
   @JsonKey()
   @override
@@ -362,12 +362,10 @@ class _$_TempTodoItemData implements _TempTodoItemData {
   @JsonKey()
   @override
   final bool allDay;
-  @JsonKey()
   @override
-  final DateTime? startTime;
-  @JsonKey()
+  final DateTime startTime;
   @override
-  final DateTime? endTime;
+  final DateTime endTime;
 
   @override
   String toString() {
@@ -407,8 +405,8 @@ abstract class _TempTodoItemData implements TempTodoItemData {
       {String title,
       String description,
       bool allDay,
-      DateTime? startTime,
-      DateTime? endTime}) = _$_TempTodoItemData;
+      required DateTime startTime,
+      required DateTime endTime}) = _$_TempTodoItemData;
 
   @override
   String get title;
@@ -417,9 +415,9 @@ abstract class _TempTodoItemData implements TempTodoItemData {
   @override
   bool get allDay;
   @override
-  DateTime? get startTime;
+  DateTime get startTime;
   @override
-  DateTime? get endTime;
+  DateTime get endTime;
   @override
   @JsonKey(ignore: true)
   _$TempTodoItemDataCopyWith<_TempTodoItemData> get copyWith =>

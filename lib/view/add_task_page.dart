@@ -13,7 +13,8 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 // 新しいタスクを追加するためのファイル
 
 class AddTaskPage extends ConsumerWidget {
-  TempTodoItemData temp = TempTodoItemData();
+  late TempTodoItemData temp =
+      TempTodoItemData(startTime: initialDate, endTime: initialDate);
   final DateTime initialDate;
   AddTaskPage(this.initialDate);
 
@@ -65,29 +66,6 @@ class AddTaskPage extends ConsumerWidget {
                         ],
                       );
                     });
-              } else if (temp.startTime == null || temp.endTime == null) {
-                showDialog(
-                    context: context,
-                    builder: (context) {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          AlertDialog(
-                            title: const Text(
-                              '時刻を設定してください。',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Text('OK'),
-                              ),
-                            ],
-                          ),
-                        ],
-                      );
-                    });
               } else {
                 await _todoNotifier.writeData(temp);
                 _toggleNotifier.state = false;
@@ -117,7 +95,7 @@ class AddTaskPage extends ConsumerWidget {
                     DateSettingWidget(
                       label: '終日',
                       child: Switch(
-                        value: _toggleProvider,
+                        value: temp.allDay,
                         onChanged: (value) {
                           _toggleNotifier.state = value;
                           temp = temp.copyWith(allDay: value);

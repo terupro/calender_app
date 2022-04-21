@@ -74,3 +74,5 @@ final toggleProvider = StateProvider((ref) => false);
 final editStartTimeProvider = StateProvider<DateTime?>((ref) => null);
 final editEndTimeProvider = StateProvider<DateTime?>((ref) => null);
 final editToggleProvider = StateProvider((ref) => false);
+
+final displayMonthProvider = StateProvider((ref) => DateTime.now());

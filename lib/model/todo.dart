@@ -20,7 +20,7 @@ class TempTodoItemData with _$TempTodoItemData {
     @Default('') String title,
     @Default('') String description,
     @Default(false) bool allDay,
-    @Default(null) DateTime? startTime,
-    @Default(null) DateTime? endTime,
+    required DateTime startTime,
+    required DateTime endTime,
   }) = _TempTodoItemData;
 }
