@@ -1,3 +1,4 @@
+import 'package:calender_app/util/util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -20,7 +21,7 @@ class AddTaskPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final _todoNotifier = ref.watch(todoDatabaseProvider.notifier);
+    final _todoDatabaseNotifier = ref.watch(todoDatabaseProvider.notifier);
     final _toggleProvider = ref.watch(toggleProvider);
     final _toggleNotifier = ref.watch(toggleProvider.notifier);
     final _startTimeProvider = ref.watch(startTimeProvider);
@@ -29,46 +30,39 @@ class AddTaskPage extends ConsumerWidget {
     final _endTimeNotifier = ref.watch(endTimeProvider.notifier);
 
     return Scaffold(
-      backgroundColor: Colors.grey[300],
+      backgroundColor: baseBackGroundColor,
       appBar: AppBar(
         title: const Text('予定の追加'),
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () {
-            _toggleNotifier.state = false;
             Navigator.pop(context);
           },
         ),
         actions: [
           SaveButtonWidget(
             press: () async {
-              if (temp.title == '' || temp.description == '') {
-                showDialog(
-                    context: context,
-                    builder: (context) {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          AlertDialog(
-                            title: const Text(
-                              '全ての項目を入力してください。',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Text('OK'),
-                              ),
-                            ],
-                          ),
-                        ],
-                      );
+              if (temp.title == '') {
+                await showDialog(
+                  context: context,
+                  builder: (context) {
+                    return addAlert('タイトルを入力してください。', () {
+                      Navigator.pop(context);
                     });
+                  },
+                );
+              } else if (temp.description == '') {
+                await showDialog(
+                  context: context,
+                  builder: (context) {
+                    return addAlert('コメントを入力してください。', () {
+                      Navigator.pop(context);
+                    });
+                  },
+                );
               } else {
-                await _todoNotifier.writeData(temp);
-                _toggleNotifier.state = false;
+                await _todoDatabaseNotifier.writeData(temp);
                 Navigator.pop(context);
               }
             },
@@ -126,7 +120,7 @@ class AddTaskPage extends ConsumerWidget {
                               ? DateFormat('yyyy-MM-dd HH:mm')
                                   .format(initialDate)
                               : DateFormat('yyyy-MM-dd HH:mm')
-                                  .format(temp.startTime!),
+                                  .format(temp.startTime),
                         ),
                       ),
                     ),
@@ -152,7 +146,7 @@ class AddTaskPage extends ConsumerWidget {
                               ? DateFormat('yyyy-MM-dd HH:mm')
                                   .format(initialDate)
                               : DateFormat('yyyy-MM-dd HH:mm')
-                                  .format(temp.endTime!),
+                                  .format(temp.endTime),
                         ),
                       ),
                     ),
@@ -176,6 +170,23 @@ class AddTaskPage extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget addAlert(String label, VoidCallback press) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        AlertDialog(
+          title: Text(label),
+          actions: [
+            TextButton(
+              onPressed: press,
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

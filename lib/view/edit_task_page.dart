@@ -1,3 +1,4 @@
+import 'package:calender_app/util/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,7 +25,9 @@ class EditTaskPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final _todoNotifier = ref.watch(todoDatabaseProvider.notifier);
+    final _todoDatabaseNotifier = ref.watch(todoDatabaseProvider.notifier);
+    final _toggleProvider = ref.watch(toggleProvider);
+    final _toggleNotifier = ref.watch(toggleProvider.notifier);
     final _titleController = TextEditingController(text: item.title);
     final _descriptionController =
         TextEditingController(text: item.description);
@@ -32,20 +35,49 @@ class EditTaskPage extends ConsumerWidget {
     var edited = item;
 
     return Scaffold(
-      backgroundColor: Colors.grey[300],
+      backgroundColor: baseBackGroundColor,
       appBar: AppBar(
         title: const Text('予定の編集'),
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: const Icon(Icons.close),
-          onPressed: () {
-            Navigator.pop(context);
+          onPressed: () async {
+            await showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  actions: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        TextButton(
+                          onPressed: () async {
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                          },
+                          child: const Text(
+                            '編集を破棄',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('キャンセル'),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              },
+            );
           },
         ),
         actions: [
           SaveButtonWidget(
             press: () async {
-              await _todoNotifier.updateData(edited);
+              await _todoDatabaseNotifier.updateData(edited);
               print(edited);
               Navigator.pop(context);
             },
@@ -149,6 +181,8 @@ class EditTaskPage extends ConsumerWidget {
                                 AlertDialog(
                                   title: const Text(
                                     '予定の削除',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.w500),
                                   ),
                                   content: const Text('本当にこの予定を削除しますか？'),
                                   actions: [
@@ -158,7 +192,10 @@ class EditTaskPage extends ConsumerWidget {
                                         Navigator.pop(context);
                                         Navigator.pop(context);
                                       },
-                                      child: const Text('削除'),
+                                      child: const Text(
+                                        '削除',
+                                        style: TextStyle(color: Colors.red),
+                                      ),
                                     ),
                                     TextButton(
                                       onPressed: () {

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-Color textColor(DateTime day) {
+textColor(DateTime day) {
   const _defaultTextColor = Colors.black87;
-
   if (day.weekday == DateTime.sunday) {
     return Colors.red;
   }
@@ -12,4 +11,5 @@ Color textColor(DateTime day) {
   return _defaultTextColor;
 }
 
-final DateTime dayTime = DateTime.now();
+final dayTime = DateTime.now();
+final baseBackGroundColor = Colors.grey[200];

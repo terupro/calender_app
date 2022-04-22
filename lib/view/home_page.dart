@@ -12,18 +12,14 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class HomePage extends ConsumerWidget {
-  final visibleProvider = StateProvider<bool>((ref) => false);
-  final selectedDayProvider = StateProvider((ref) => DateTime.now());
-  final focusedDayProvider = StateProvider((ref) => DateTime.now());
-  final pageControllerProvider = StateProvider((ref) => PageController());
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final _selectedDayNotifier = ref.watch(selectedDayProvider.notifier);
     final _focusedDayProvider = ref.watch(focusedDayProvider);
-
     final _focusedDayNotifier = ref.watch(focusedDayProvider.notifier);
     final _visibleProvider = ref.watch(visibleProvider);
     final _visibleNotifier = ref.watch(visibleProvider.notifier);
+    final _todoDatabaseProvider = ref.watch(todoDatabaseProvider);
     final _todoDatabaseNotifier = ref.watch(todoDatabaseProvider.notifier);
     final _displayMonthProvider = ref.watch(displayMonthProvider);
     final _displayMonthNotifier = ref.watch(displayMonthProvider.notifier);
@@ -57,30 +53,56 @@ class HomePage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calender'),
+        title: const Text('カレンダー'),
       ),
       body: Stack(
         children: [
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            color: baseBackGroundColor,
+          ),
           TableCalendar(
             locale: 'ja',
-            headerStyle: const HeaderStyle(
-              formatButtonVisible: false,
-              titleCentered: true,
-              titleTextStyle:
-                  TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
-            ),
             firstDay: DateTime.utc(2010, 10, 16),
             lastDay: DateTime.utc(2030, 3, 14),
             focusedDay: _focusedDayNotifier.state,
             eventLoader: _getEventForDay,
-            onPageChanged: (date) {
-              _focusedDayNotifier.state = date;
-              print(_focusedDayNotifier.state);
-            },
+            daysOfWeekHeight: 25.0,
+            daysOfWeekStyle: DaysOfWeekStyle(
+              decoration: BoxDecoration(
+                border: Border.all(width: 0.1),
+                color: Colors.grey[100],
+              ),
+            ),
+            headerStyle: const HeaderStyle(
+                formatButtonVisible: false,
+                titleCentered: true,
+                titleTextStyle:
+                    TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
+                decoration: BoxDecoration(color: Colors.white)),
+            calendarBuilders: CalendarBuilders(
+              defaultBuilder:
+                  (BuildContext context, DateTime day, DateTime focusedDay) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 0),
+                  alignment: Alignment.center,
+                  child: Text(
+                    day.day.toString(),
+                    style: TextStyle(
+                      color: textColor(day),
+                    ),
+                  ),
+                );
+              },
+            ),
             calendarStyle: CalendarStyle(
-              cellMargin: const EdgeInsets.all(8.0),
-              weekendTextStyle: const TextStyle(color: Colors.red),
+              markerMargin: const EdgeInsets.all(6),
+              cellMargin: const EdgeInsets.all(8),
               holidayTextStyle: const TextStyle(color: Colors.red),
+              rangeHighlightColor: Colors.white,
+              defaultDecoration: const BoxDecoration(color: Colors.white),
+              rowDecoration: const BoxDecoration(color: Colors.white),
               todayDecoration: BoxDecoration(
                 color: Colors.blue.withOpacity(0.7),
                 shape: BoxShape.circle,
@@ -90,11 +112,13 @@ class HomePage extends ConsumerWidget {
                 shape: BoxShape.circle,
               ),
             ),
+            onPageChanged: (date) {
+              _focusedDayNotifier.state = date;
+            },
             selectedDayPredicate: (day) {
               return isSameDay(_selectedDayNotifier.state, day);
             },
             onDaySelected: (selectedDay, focusedDay) {
-              // Providerの状態を更新
               _selectedDayNotifier.state = selectedDay;
               _selectedDayNotifier.state = focusedDay;
               _visibleNotifier.state = true;
@@ -117,11 +141,6 @@ class HomePage extends ConsumerWidget {
             visible: _visibleProvider,
             child: Container(
               margin: const EdgeInsets.only(top: 50, bottom: 50),
-              // child: ListView(
-              //   scrollDirection: Axis.horizontal,
-              //   children: _allDateCard(
-              //       todoItems, _todoDatabaseNotifier, _focusedDayProvider),
-              // ),
               child: PageView(
                 controller: _pageControllerProvider,
                 children: _allDateCard(
@@ -162,13 +181,11 @@ class HomePage extends ConsumerWidget {
     return Consumer(
       builder: ((context, ref, child) {
         return Container(
-          width: 355,
-          height: double.infinity,
           margin: const EdgeInsets.only(left: 10, right: 10),
           padding: const EdgeInsets.all(15),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(25),
           ),
           child: Column(
             children: [
@@ -195,7 +212,6 @@ class HomePage extends ConsumerWidget {
                   ),
                 ],
               ),
-              const Divider(height: 2),
               if (items.isNotEmpty)
                 ...items.map(
                   (item) {
@@ -207,52 +223,67 @@ class HomePage extends ConsumerWidget {
                               EditTaskPage(item: item, db: db),
                         ),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: SizedBox(
-                          height: 50,
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              item.allDay == true
-                                  ? const Text('終日')
-                                  : Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          DateFormat('HH:mm')
-                                              .format(item.startTime!),
-                                          style: const TextStyle(fontSize: 15),
-                                        ),
-                                        const SizedBox(height: 5),
-                                        Text(
-                                          DateFormat('HH:mm')
-                                              .format(item.endTime!),
-                                          style: const TextStyle(fontSize: 15),
-                                        )
-                                      ],
-                                    ),
-                              const SizedBox(width: 10),
-                              Container(
-                                width: 5,
-                                height: 43,
-                                color: Colors.blue,
-                              ),
-                              const SizedBox(width: 15),
-                              Text(
-                                (item.title),
-                                style: const TextStyle(fontSize: 20),
-                              ),
-                            ],
+                      child: Column(
+                        children: [
+                          const Divider(height: 2),
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                item.allDay == true
+                                    ? const Padding(
+                                        padding:
+                                            EdgeInsets.only(left: 6, right: 6),
+                                        child: Text('終日'),
+                                      )
+                                    : Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            DateFormat('HH:mm')
+                                                .format(item.startTime!),
+                                            style:
+                                                const TextStyle(fontSize: 15),
+                                          ),
+                                          const SizedBox(height: 5),
+                                          Text(
+                                            DateFormat('HH:mm')
+                                                .format(item.endTime!),
+                                            style:
+                                                const TextStyle(fontSize: 15),
+                                          )
+                                        ],
+                                      ),
+                                const SizedBox(width: 10),
+                                Container(
+                                  width: 5,
+                                  height: 43,
+                                  color: Colors.blue,
+                                ),
+                                const SizedBox(width: 20),
+                                Text(
+                                  (item.title),
+                                  style: const TextStyle(fontSize: 20),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     );
                   },
                 )
               else
-                const Text('予定なし'),
+                const Expanded(
+                  child: Center(
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: 20.0),
+                      child: Text('予定がありません。'),
+                    ),
+                  ),
+                ),
             ],
           ),
         );

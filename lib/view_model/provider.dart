@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:calender_app/model/todo.dart';
 import 'package:calender_app/service/db.dart';
@@ -54,6 +55,12 @@ class TodoDatabaseNotifier extends StateNotifier<TodoStateData> {
       todoItems: todoItems,
     );
   }
+
+  Future<List<TodoItemData>> readAllData() async {
+    final db = MyDatabase();
+    List<TodoItemData> datas = await db.readAllTodoData();
+    return datas;
+  }
 }
 
 // 無名関数の中に処理を書くことで初期化を可能にしている。これにより最新の状態を管理できる。
@@ -63,16 +70,12 @@ final todoDatabaseProvider = StateNotifierProvider((_) {
   return notify;
 });
 
+// 状態を管理したいもの
 final visibleProvider = StateProvider<bool>((ref) => false);
+final pageControllerProvider = StateProvider((ref) => PageController());
 final selectedDayProvider = StateProvider((ref) => DateTime.now());
 final focusedDayProvider = StateProvider((ref) => DateTime.now());
-
 final startTimeProvider = StateProvider<DateTime?>((ref) => null);
 final endTimeProvider = StateProvider<DateTime?>((ref) => null);
 final toggleProvider = StateProvider((ref) => false);
-
-final editStartTimeProvider = StateProvider<DateTime?>((ref) => null);
-final editEndTimeProvider = StateProvider<DateTime?>((ref) => null);
-final editToggleProvider = StateProvider((ref) => false);
-
 final displayMonthProvider = StateProvider((ref) => DateTime.now());
