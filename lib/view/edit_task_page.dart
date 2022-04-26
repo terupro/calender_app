@@ -26,12 +26,15 @@ class EditTaskPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final _todoDatabaseNotifier = ref.watch(todoDatabaseProvider.notifier);
-    final _toggleProvider = ref.watch(toggleProvider);
-    final _toggleNotifier = ref.watch(toggleProvider.notifier);
+    final _editToggleProvider = ref.watch(editToggleProvider);
+    final _editToggleNotifier = ref.watch(editToggleProvider.notifier);
+    final _editStartTimeProvider = ref.watch(editStartTimeProvider);
+    final _editStartTimeNotifier = ref.watch(editStartTimeProvider.notifier);
+    final _editEndTimeProvider = ref.watch(editEndTimeProvider);
+    final _editEndTimeNotifier = ref.watch(editEndTimeProvider.notifier);
     final _titleController = TextEditingController(text: item.title);
     final _descriptionController =
         TextEditingController(text: item.description);
-
     var edited = item;
 
     return Scaffold(
@@ -123,14 +126,20 @@ class EditTaskPage extends ConsumerWidget {
                             showTitleActions: true,
                             minTime: edited.startTime,
                             onConfirm: (date) {
+                              _editStartTimeNotifier.state = date;
                               edited = edited.copyWith(startTime: date);
                             },
                             currentTime: edited.startTime,
                             locale: LocaleType.jp,
                           );
                         },
-                        child: Text(DateFormat('yyyy-MM-dd HH:mm')
-                            .format(edited.startTime!)),
+                        child: Text(
+                          _editStartTimeProvider == null
+                              ? DateFormat('yyyy-MM-dd HH:mm')
+                                  .format(item.startTime!)
+                              : DateFormat('yyyy-MM-dd HH:mm')
+                                  .format(edited.startTime!),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 1),
@@ -143,6 +152,7 @@ class EditTaskPage extends ConsumerWidget {
                             showTitleActions: true,
                             minTime: edited.endTime,
                             onConfirm: (date) {
+                              _editEndTimeNotifier.state = date;
                               edited = edited.copyWith(endTime: date);
                             },
                             currentTime: edited.endTime,
@@ -150,8 +160,11 @@ class EditTaskPage extends ConsumerWidget {
                           );
                         },
                         child: Text(
-                          DateFormat('yyyy-MM-dd HH:mm')
-                              .format(edited.endTime!),
+                          _editStartTimeProvider == null
+                              ? DateFormat('yyyy-MM-dd HH:mm')
+                                  .format(item.endTime!)
+                              : DateFormat('yyyy-MM-dd HH:mm')
+                                  .format(edited.endTime!),
                         ),
                       ),
                     ),

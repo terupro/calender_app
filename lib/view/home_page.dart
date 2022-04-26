@@ -52,9 +52,6 @@ class HomePage extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('カレンダー'),
-      ),
       body: Stack(
         children: [
           Container(
@@ -62,70 +59,123 @@ class HomePage extends ConsumerWidget {
             height: double.infinity,
             color: baseBackGroundColor,
           ),
-          TableCalendar(
-            locale: 'ja',
-            firstDay: DateTime.utc(2010, 10, 16),
-            lastDay: DateTime.utc(2030, 3, 14),
-            focusedDay: _focusedDayNotifier.state,
-            eventLoader: _getEventForDay,
-            daysOfWeekHeight: 25.0,
-            daysOfWeekStyle: DaysOfWeekStyle(
-              decoration: BoxDecoration(
-                border: Border.all(width: 0.1),
-                color: Colors.grey[100],
-              ),
-            ),
-            headerStyle: const HeaderStyle(
-                formatButtonVisible: false,
-                titleCentered: true,
-                titleTextStyle:
-                    TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
-                decoration: BoxDecoration(color: Colors.white)),
-            calendarBuilders: CalendarBuilders(
-              defaultBuilder:
-                  (BuildContext context, DateTime day, DateTime focusedDay) {
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 0),
-                  alignment: Alignment.center,
-                  child: Text(
-                    day.day.toString(),
-                    style: TextStyle(
-                      color: textColor(day),
+          Column(
+            children: [
+              Container(
+                child: Column(
+                  children: [
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: const Text(
+                        'カレンダー',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
                     ),
-                  ),
-                );
-              },
-            ),
-            calendarStyle: CalendarStyle(
-              markerMargin: const EdgeInsets.all(6),
-              cellMargin: const EdgeInsets.all(8),
-              holidayTextStyle: const TextStyle(color: Colors.red),
-              rangeHighlightColor: Colors.white,
-              defaultDecoration: const BoxDecoration(color: Colors.white),
-              rowDecoration: const BoxDecoration(color: Colors.white),
-              todayDecoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.7),
-                shape: BoxShape.circle,
-              ),
-              selectedDecoration: const BoxDecoration(
+                  ],
+                ),
+                height: 100,
+                width: double.infinity,
                 color: Colors.blue,
-                shape: BoxShape.circle,
               ),
-            ),
-            onPageChanged: (date) {
-              _focusedDayNotifier.state = date;
-            },
-            selectedDayPredicate: (day) {
-              return isSameDay(_selectedDayNotifier.state, day);
-            },
-            onDaySelected: (selectedDay, focusedDay) {
-              _selectedDayNotifier.state = selectedDay;
-              _selectedDayNotifier.state = focusedDay;
-              _visibleNotifier.state = true;
-              _pageControllerNotifier.state =
-                  PageController(initialPage: selectedDay.day - 1);
-            },
+              TableCalendar(
+                locale: 'ja',
+                firstDay: DateTime.utc(2010, 10, 16),
+                lastDay: DateTime.utc(2030, 3, 14),
+                focusedDay: _focusedDayNotifier.state,
+                eventLoader: _getEventForDay,
+                startingDayOfWeek: StartingDayOfWeek.monday,
+                daysOfWeekHeight: 25.0,
+                holidayPredicate: (day) {
+                  return false;
+                },
+                weekendDays: [5],
+                daysOfWeekStyle: DaysOfWeekStyle(
+                  decoration: BoxDecoration(
+                    border: Border.all(width: 0.1),
+                    color: Colors.grey[100],
+                  ),
+                ),
+                headerStyle: const HeaderStyle(
+                  formatButtonVisible: false,
+                  titleCentered: true,
+                  titleTextStyle:
+                      TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
+                  decoration: BoxDecoration(color: Colors.white),
+                  leftChevronVisible: false,
+                  rightChevronVisible: false,
+                  headerPadding: EdgeInsets.all(8),
+                ),
+                calendarBuilders: CalendarBuilders(
+                  defaultBuilder: (BuildContext context, DateTime day,
+                      DateTime focusedDay) {
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 0),
+                      alignment: Alignment.center,
+                      child: Text(
+                        day.day.toString(),
+                        style: TextStyle(
+                          color: textColor(day),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                calendarStyle: CalendarStyle(
+                  markerMargin: const EdgeInsets.all(6),
+                  cellMargin: const EdgeInsets.all(8),
+                  rangeHighlightColor: Colors.white,
+                  defaultDecoration: const BoxDecoration(color: Colors.white),
+                  rowDecoration: const BoxDecoration(color: Colors.white),
+                  todayDecoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.7),
+                    shape: BoxShape.circle,
+                  ),
+                  selectedDecoration: const BoxDecoration(
+                    color: Colors.blue,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                onPageChanged: (date) {
+                  _focusedDayNotifier.state = date;
+                },
+                selectedDayPredicate: (day) {
+                  return isSameDay(_selectedDayNotifier.state, day);
+                },
+                onDaySelected: (selectedDay, focusedDay) {
+                  _selectedDayNotifier.state = selectedDay;
+                  _selectedDayNotifier.state = focusedDay;
+                  _visibleNotifier.state = true;
+                  _pageControllerNotifier.state =
+                      PageController(initialPage: selectedDay.day - 1);
+                },
+              ),
+            ],
           ),
+          Positioned(
+              top: 100,
+              left: 30.0,
+              child: OutlinedButton(
+                onPressed: () {
+                  _visibleNotifier.state = true;
+                  _pageControllerNotifier.state =
+                      PageController(initialPage: dayTime.day - 1);
+                },
+                child: const Text('今日', style: TextStyle(color: Colors.grey)),
+                style: OutlinedButton.styleFrom(
+                  primary: Colors.grey,
+                  minimumSize: const Size(50, 30),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  side: const BorderSide(color: Colors.grey),
+                ),
+              )),
           GestureDetector(
             onTap: () => _visibleNotifier.state = false,
             child: Visibility(
@@ -140,7 +190,7 @@ class HomePage extends ConsumerWidget {
           Visibility(
             visible: _visibleProvider,
             child: Container(
-              margin: const EdgeInsets.only(top: 50, bottom: 50),
+              margin: const EdgeInsets.only(top: 200, bottom: 50),
               child: PageView(
                 controller: _pageControllerProvider,
                 children: _allDateCard(
