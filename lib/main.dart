@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
         Locale('ja'),
       ],
       debugShowCheckedModeBanner: false,
-      title: 'Calender',
+      title: 'カレンダー',
       theme: ThemeData(primaryColor: Colors.blue),
       home: HomePage(),
     );

@@ -17,6 +17,7 @@ class TextFieldWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      autofocus: true,
       textAlignVertical: TextAlignVertical.top,
       keyboardType: TextInputType.multiline,
       maxLines: null,

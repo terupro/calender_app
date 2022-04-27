@@ -5,11 +5,12 @@ import 'package:calender_app/util/util.dart';
 import 'package:calender_app/view/add_task_page.dart';
 import 'package:calender_app/view/edit_task_page.dart';
 import 'package:calender_app/view_model/provider.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:nholiday_jp/nholiday_jp.dart';
 
 class HomePage extends ConsumerWidget {
   @override
@@ -94,12 +95,12 @@ class HomePage extends ConsumerWidget {
                 holidayPredicate: (day) {
                   return false;
                 },
-                weekendDays: [5],
                 daysOfWeekStyle: DaysOfWeekStyle(
                   decoration: BoxDecoration(
                     border: Border.all(width: 0.1),
                     color: Colors.grey[100],
                   ),
+                  weekendStyle: const TextStyle(color: Colors.red),
                 ),
                 headerStyle: const HeaderStyle(
                   formatButtonVisible: false,
@@ -158,24 +159,33 @@ class HomePage extends ConsumerWidget {
             ],
           ),
           Positioned(
-              top: 100,
-              left: 30.0,
-              child: OutlinedButton(
-                onPressed: () {
-                  _visibleNotifier.state = true;
-                  _pageControllerNotifier.state =
-                      PageController(initialPage: dayTime.day - 1);
-                },
-                child: const Text('今日', style: TextStyle(color: Colors.grey)),
-                style: OutlinedButton.styleFrom(
-                  primary: Colors.grey,
-                  minimumSize: const Size(50, 30),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  side: const BorderSide(color: Colors.grey),
+            top: 100,
+            left: 30.0,
+            child: OutlinedButton(
+              onPressed: () {
+                _visibleNotifier.state = true;
+                _pageControllerNotifier.state =
+                    PageController(initialPage: dayTime.day - 1);
+              },
+              child: const Text('今日', style: TextStyle(color: Colors.grey)),
+              style: OutlinedButton.styleFrom(
+                primary: Colors.grey,
+                minimumSize: const Size(50, 30),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
                 ),
-              )),
+                side: const BorderSide(color: Colors.grey),
+              ),
+            ),
+          ),
+          const Positioned(
+            top: 103,
+            right: 95,
+            child: Icon(
+              Icons.arrow_drop_down,
+              size: 40,
+            ),
+          ),
           GestureDetector(
             onTap: () => _visibleNotifier.state = false,
             child: Visibility(
@@ -266,13 +276,27 @@ class HomePage extends ConsumerWidget {
                 ...items.map(
                   (item) {
                     return GestureDetector(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              EditTaskPage(item: item, db: db),
-                        ),
-                      ),
+                      onTap: () {
+                        final _editStartTimeNotifier =
+                            ref.watch(editStartTimeProvider.notifier);
+                        _editStartTimeNotifier.state = item.startTime;
+
+                        final _editEndTimeNotifier =
+                            ref.watch(editEndTimeProvider.notifier);
+                        _editEndTimeNotifier.state = item.endTime;
+
+                        final _editToggleNotifier =
+                            ref.watch(editToggleProvider.notifier);
+                        _editToggleNotifier.state = item.allDay;
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                EditTaskPage(item: item, db: db),
+                          ),
+                        );
+                      },
                       child: Column(
                         children: [
                           const Divider(height: 2),

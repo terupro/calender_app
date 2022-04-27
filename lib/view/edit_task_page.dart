@@ -1,4 +1,5 @@
 import 'package:calender_app/util/util.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,6 +36,7 @@ class EditTaskPage extends ConsumerWidget {
     final _titleController = TextEditingController(text: item.title);
     final _descriptionController =
         TextEditingController(text: item.description);
+
     var edited = item;
 
     return Scaffold(
@@ -80,6 +82,11 @@ class EditTaskPage extends ConsumerWidget {
         actions: [
           SaveButtonWidget(
             press: () async {
+              final edited = item.copyWith(
+                startTime: _editStartTimeProvider,
+                endTime: _editEndTimeProvider,
+                allDay: _editToggleProvider,
+              );
               await _todoDatabaseNotifier.updateData(edited);
               print(edited);
               Navigator.pop(context);
@@ -108,9 +115,11 @@ class EditTaskPage extends ConsumerWidget {
                     DateSettingWidget(
                       label: '終日',
                       child: Switch(
-                        value: edited.allDay,
+                        value: _editToggleProvider,
                         onChanged: (value) {
+                          _editToggleNotifier.state = value;
                           edited = edited.copyWith(allDay: value);
+                          print(value);
                         },
                         activeTrackColor: Colors.lightGreenAccent,
                         activeColor: Colors.green,
@@ -124,8 +133,12 @@ class EditTaskPage extends ConsumerWidget {
                           DatePicker.showDateTimePicker(
                             context,
                             showTitleActions: true,
-                            minTime: edited.startTime,
+                            minTime: dayTime,
                             onConfirm: (date) {
+                              _editStartTimeNotifier.state = date;
+                              edited = edited.copyWith(startTime: date);
+                            },
+                            onChanged: (date) {
                               _editStartTimeNotifier.state = date;
                               edited = edited.copyWith(startTime: date);
                             },
@@ -134,11 +147,8 @@ class EditTaskPage extends ConsumerWidget {
                           );
                         },
                         child: Text(
-                          _editStartTimeProvider == null
-                              ? DateFormat('yyyy-MM-dd HH:mm')
-                                  .format(item.startTime!)
-                              : DateFormat('yyyy-MM-dd HH:mm')
-                                  .format(edited.startTime!),
+                          DateFormat('yyyy-MM-dd HH:mm')
+                              .format(_editStartTimeProvider!),
                         ),
                       ),
                     ),
@@ -150,8 +160,12 @@ class EditTaskPage extends ConsumerWidget {
                           DatePicker.showDateTimePicker(
                             context,
                             showTitleActions: true,
-                            minTime: edited.endTime,
+                            minTime: dayTime,
                             onConfirm: (date) {
+                              _editEndTimeNotifier.state = date;
+                              edited = edited.copyWith(endTime: date);
+                            },
+                            onChanged: (date) {
                               _editEndTimeNotifier.state = date;
                               edited = edited.copyWith(endTime: date);
                             },
@@ -160,11 +174,8 @@ class EditTaskPage extends ConsumerWidget {
                           );
                         },
                         child: Text(
-                          _editStartTimeProvider == null
-                              ? DateFormat('yyyy-MM-dd HH:mm')
-                                  .format(item.endTime!)
-                              : DateFormat('yyyy-MM-dd HH:mm')
-                                  .format(edited.endTime!),
+                          DateFormat('yyyy-MM-dd HH:mm')
+                              .format(_editEndTimeProvider!),
                         ),
                       ),
                     ),
